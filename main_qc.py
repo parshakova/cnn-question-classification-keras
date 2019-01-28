@@ -40,25 +40,16 @@ def load_wv_vocab(embed_file):
         set: a set of tokens (str) contained in the word vector file.
     '''
     vocab = []
+    embs = []
     with open(embed_file) as f:
         for line in f:
             elems = line.split()
             token = ''.join(elems[0:-wv_dim]).strip() # a token may contain space
             if not token in vocab:
                  vocab.append(token)
-
-    embs = np.zeros((len(vocab)+1, wv_dim))
-    w2id = set([w for i, w in enumerate(vocab)])
-    with open(embed_file) as f:
-        for line in f:
-            elems = line.split()
-            #token = normalize_text(''.join(elems[0:-wv_dim]))
-            token = ''.join(elems[0:-wv_dim]).strip()
-            print(token)
-            if token in w2id:
-                #print(elems[-wv_dim:])
-                embs[len(vocab) - len(w2id)] = [float(v) for v in elems[-wv_dim:]]
-                w2id.remove(token)
+                 embs += [[float(v) for v in elems[-wv_dim:]]]  
+    embs += [[0]*wv_dim]
+    embs = np.array(embs)
     return vocab, embs
 
 wv_dim = 100
@@ -176,11 +167,8 @@ STAMP = 'lstm_' + timestr
 
 early_stopping =EarlyStopping(monitor='val_loss', patience=3)
 bst_model_path = STAMP + '.h5'
-model_checkpoint = ModelCheckpoint(bst_model_path, save_best_only=True, save_weights_only=True)
 
-hist = model.fit([doc_train, left_train, right_train], target_train, validation_data=([doc_val, left_val, right_val], target_val), epochs = 50, batch_size=512, shuffle=True, callbacks=[early_stopping, model_checkpoint])
+hist = model.fit([doc_train, left_train, right_train], target_train, validation_data=([doc_val, left_val, right_val], target_val), epochs = 50, batch_size=512, shuffle=True, callbacks=[early_stopping])
 
-
-model.load_weights(bst_model_path)
 model.save_weights(bst_model_path)
 bst_val_score = min(hist.history['val_loss'])
