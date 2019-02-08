@@ -1,3 +1,8 @@
+For classifying arbitrary spans of words:
+1. run `python main_qc_bigg.py`
+2. then with saved checkpoint run `python test_qc_bigg.py`
+
+
 # Recurrent Convolutional Neural Networks for Chinese Question Classification on BQuLD
 
 ## Architecture Overview
